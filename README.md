@@ -9,28 +9,28 @@
   </p>
 </div>
 <hr>
-## 📖 1. The Engineering Challenge (The Story)
-In modern aeronautics and high-performance automotive engineering, **aerodynamic noise** is a critical design constraint. As air flows over an airfoil (such as an aircraft wing, turbine blade, or sports car spoiler), turbulence interacts with the blade's trailing edge, generating **airfoil self-noise**.
-Testing every new wing prototype inside an acoustic wind tunnel is **expensive, time-consuming, and resource-intensive**.
-**💡 The Solution:**
-Instead of relying solely on physical wind tunnel tests for every design iteration, this project builds a **scalable Machine Learning Pipeline using Apache Spark (PySpark)**. By leveraging historical wind tunnel data from **NASA**, our pipeline processes raw aerodynamic measurements, standardizes the features, and trains a predictive model capable of estimating the **Sound Pressure Level (in Decibels)** of an airfoil before it is physically manufactured.
+<h2>📖 1. The Engineering Challenge (The Story)</h2>
+<p>In modern aeronautics and high-performance automotive engineering, <strong>aerodynamic noise</strong> is a critical design constraint. As air flows over an airfoil (such as an aircraft wing, turbine blade, or sports car spoiler), turbulence interacts with the blade's trailing edge, generating <strong>airfoil self-noise</strong>.</p>
+<p>Testing every new wing prototype inside an acoustic wind tunnel is <strong>expensive, time-consuming, and resource-intensive</strong>.</p>
+<p><strong>💡 The Solution:</strong><br>
+Instead of relying solely on physical wind tunnel tests for every design iteration, this project builds a <strong>scalable Machine Learning Pipeline using Apache Spark (PySpark)</strong>. By leveraging historical wind tunnel data from <strong>NASA</strong>, our pipeline processes raw aerodynamic measurements, standardizes the features, and trains a predictive model capable of estimating the <strong>Sound Pressure Level (in Decibels)</strong> of an airfoil before it is physically manufactured.</p>
 <div align="center">
   <img src="https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMSkillsNetwork-BD0231EN-Coursera/images/Airfoil_with_flow.png" width="45%" alt="Airfoil Airflow Diagram">
   <img src="https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMSkillsNetwork-BD0231EN-Coursera/images/Airfoil_angle_of_attack.jpg" width="45%" alt="Airfoil Angle of Attack Diagram">
   <p><em>Physical geometry of an airfoil showing airflow behavior and the Angle of Attack (α).</em></p>
 </div>
 <hr>
-## 🏗️ 2. Pipeline Architecture & Workflow
-To ensure the solution can scale from thousands to millions of sensor readings in a distributed environment, the entire workflow is engineered using **PySpark SQL** and **PySpark MLlib**:
+<h2>🏗️ 2. Pipeline Architecture & Workflow</h2>
+<p>To ensure the solution can scale from thousands to millions of sensor readings in a distributed environment, the entire workflow is engineered using <strong>PySpark SQL</strong> and <strong>PySpark MLlib</strong>:</p>
 
 | **1. Raw Data** | ➡️ | **2. Spark ETL** | ➡️ | **3. Feature Engineering** | ➡️ | **4. ML Training** | ➡️ | **5. Deployment** |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `CSV` (1,522 rows) |  | Deduplicate & Drop Nulls → `Parquet` (1,499 rows) |  | `VectorAssembler` + `StandardScaler` |  | `LinearRegression` Model |  | Persisted `PipelineModel` |
 
 <hr>
-## 🛠️ 3. Data Engineering & ETL Journey
-The dataset used in this project is derived from the **NASA Airfoil Self-Noise Dataset** (obtained from a series of aerodynamic and acoustic tests of two and three-dimensional airfoil blade sections conducted in an anechoic wind tunnel).
-### 🔹 Feature Dictionary
+<h2>🛠️ 3. Data Engineering & ETL Journey</h2>
+<p>The dataset used in this project is derived from the <strong>NASA Airfoil Self-Noise Dataset</strong> (obtained from a series of aerodynamic and acoustic tests of two and three-dimensional airfoil blade sections conducted in an anechoic wind tunnel).</p>
+<h3>🔹 Feature Dictionary</h3>
 
 | Column Name | Unit | Aerodynamic Description | Role |
 | :--- | :--- | :--- | :--- |
@@ -41,24 +41,30 @@ The dataset used in this project is derived from the **NASA Airfoil Self-Noise D
 | **`SuctionSideDisplacement`** | Meters (m) | Boundary layer displacement thickness on the suction side. | Input Feature |
 | **`SoundLevelDecibels`** | dB | Scaled Sound Pressure Level (Target to predict). | **Target Label** |
 
-### 🔹 Raw Data Inspection
-Below is a sample of the ingested raw telemetry data before transformation:
-![Raw Data Sample](raw_data_sample.png)
-### 🔹 Data Quality & Optimization Metrics
-During the **ETL (Extract, Transform, Load)** phase, the dataset underwent strict quality checks before being converted to **Apache Parquet** for optimized columnar storage and faster I/O performance:
-* **Initial Raw Records:** `1,522` rows
-* **After Deduplication (`dropDuplicates`):** `1,503` rows *(19 duplicate records removed)*
-* **After Null Removal (`dropna`):** `1,499` clean rows *(4 incomplete records removed)*
-* **Schema Standardization:** Renamed target column from `SoundLevel` to `SoundLevelDecibels`.
+<h3>🔹 Raw Data Inspection</h3>
+<p>Below is a sample of the ingested raw telemetry data before transformation:</p>
+<p align="center">
+  <img src="raw_data_sample.png" width="90%" alt="Raw Data Sample">
+</p>
+<h3>🔹 Data Quality & Optimization Metrics</h3>
+<p>During the <strong>ETL (Extract, Transform, Load)</strong> phase, the dataset underwent strict quality checks before being converted to <strong>Apache Parquet</strong> for optimized columnar storage and faster I/O performance:</p>
+<ul>
+  <li><strong>Initial Raw Records:</strong> <code>1,522</code> rows</li>
+  <li><strong>After Deduplication (<code>dropDuplicates</code>):</strong> <code>1,503</code> rows <em>(19 duplicate records removed)</em></li>
+  <li><strong>After Null Removal (<code>dropna</code>):</strong> <code>1,499</code> clean rows <em>(4 incomplete records removed)</em></li>
+  <li><strong>Schema Standardization:</strong> Renamed target column from <code>SoundLevel</code> to <code>SoundLevelDecibels</code>.</li>
+</ul>
 <hr>
-## ⚙️ 4. Machine Learning Pipeline Construction
-To prevent data leakage and ensure seamless deployment, feature transformations and model training were encapsulated into a unified **3-Stage Spark ML Pipeline** (trained on **70%** of the data and tested on **30%** with `seed=42`):
-1. **Stage 1 — `VectorAssembler`:** Consolidates the 5 physical and aerodynamic input columns into a single dense feature vector (`features`).
-2. **Stage 2 — `StandardScaler`:** Because features vary drastically in scale (e.g., `Frequency` in thousands of Hz vs. `SuctionSideDisplacement` in thousandths of a meter), this stage normalizes all features to unit standard deviation (`scaledFeatures`).
-3. **Stage 3 — `LinearRegression`:** Fits a multivariate linear regression model mapping the scaled features to `SoundLevelDecibels`.
+<h2>⚙️ 4. Machine Learning Pipeline Construction</h2>
+<p>To prevent data leakage and ensure seamless deployment, feature transformations and model training were encapsulated into a unified <strong>3-Stage Spark ML Pipeline</strong> (trained on <strong>70%</strong> of the data and tested on <strong>30%</strong> with <code>seed=42</code>):</p>
+<ol>
+  <li><strong>Stage 1 — <code>VectorAssembler</code>:</strong> Consolidates the 5 physical and aerodynamic input columns into a single dense feature vector (<code>features</code>).</li>
+  <li><strong>Stage 2 — <code>StandardScaler</code>:</strong> Because features vary drastically in scale (e.g., <code>Frequency</code> in thousands of Hz vs. <code>SuctionSideDisplacement</code> in thousandths of a meter), this stage normalizes all features to unit standard deviation (<code>scaledFeatures</code>).</li>
+  <li><strong>Stage 3 — <code>LinearRegression</code>:</strong> Fits a multivariate linear regression model mapping the scaled features to <code>SoundLevelDecibels</code>.</li>
+</ol>
 <hr>
-## 📊 5. Model Evaluation & Physical Insights
-### 🔹 Regression Performance on Unseen Test Data
+<h2>📊 5. Model Evaluation & Physical Insights</h2>
+<h3>🔹 Regression Performance on Unseen Test Data</h3>
 
 | Evaluation Metric | Value | Interpretation |
 | :--- | :--- | :--- |
@@ -67,11 +73,13 @@ To prevent data leakage and ensure seamless deployment, feature transformations 
 | **R-Squared ($R^2$)** | **`0.54`** | The linear baseline explains **54%** of the variance in acoustic noise across diverse aerodynamic regimes. |
 | **Model Intercept ($\beta_0$)** | **`132.60 dB`** | Baseline acoustic level when standardized features are at zero. |
 
-### 🔹 Sample Inference (Actual vs. Predicted)
-After persisting the trained pipeline to disk (`PipelineModel`) and reloading it for production inference, the model generated the following predictions on the test set:
-![Model Predictions Output](prediction_output.png)
-### 🔹 Aerodynamic Insights from Model Coefficients
-By inspecting the learned weights of the standardized Linear Regression model, we can extract meaningful physical insights into what drives airfoil noise:
+<h3>🔹 Sample Inference (Actual vs. Predicted)</h3>
+<p>After persisting the trained pipeline to disk (<code>PipelineModel</code>) and reloading it for production inference, the model generated the following predictions on the test set:</p>
+<p align="center">
+  <img src="predictions_output.png" width="65%" alt="Model Predictions Output">
+</p>
+<h3>🔹 Aerodynamic Insights from Model Coefficients</h3>
+<p>By inspecting the learned weights of the standardized Linear Regression model, we can extract meaningful physical insights into what drives airfoil noise:</p>
 
 | Aerodynamic Feature | Learned Coefficient | Physical & Engineering Impact |
 | :--- | :--- | :--- |
@@ -82,18 +90,20 @@ By inspecting the learned weights of the standardized Linear Regression model, w
 | **`FreeStreamVelocity`** | **`+1.5789`** | **Primary Positive Driver:** Faster airflow velocity directly increases kinetic energy and turbulence intensity, raising noise levels (dB). |
 
 <hr>
-## 🚀 6. How to Run This Project
-1. **Clone the repository:**
+<h2>🚀 6. How to Run This Project</h2>
+<p><strong>1. Clone the repository:</strong></p>
 <pre><code>git clone https://github.com/TariqZJawad/-nasa-airfoil-noise-prediction-pyspark.git
 cd -nasa-airfoil-noise-prediction-pyspark</code></pre>
-2. **Install dependencies:**
+<p><strong>2. Install dependencies:</strong></p>
 <pre><code>pip install pyspark==3.1.2 findspark</code></pre>
-3. **Run the Jupyter Notebook or Python Script:**
-   Open `Airfoil_Noise_Prediction_Pipeline.ipynb` in JupyterLab / Google Colab and execute the cells sequentially.
+<p><strong>3. Run the Jupyter Notebook or Python Script:</strong><br>
+Open <code>Airfoil_Noise_Prediction_Pipeline.ipynb</code> in JupyterLab / Google Colab and execute the cells sequentially.</p>
 <hr>
-## 👨‍💻 Author & Contact
-**Tariq Zeyad Jawad**  
-*Physics Graduate | Data Engineering & Machine Learning Enthusiast*
-* 🌐 **Website:** [tariqjawad.com](https://tariqjawad.com)
-* 💼 **LinkedIn:** [linkedin.com/in/tariq-jawad](https://www.linkedin.com/in/tariq-jawad)
-* 📧 **Email:** [tariq.z.jawad4@gmail.com](mailto:tariq.z.jawad4@gmail.com)
+<h2>👨‍💻 Author & Contact</h2>
+<p><strong>Tariq Zeyad Jawad</strong><br>
+<em>Physics Graduate | Data Engineering & Machine Learning Enthusiast</em></p>
+<ul>
+  <li>🌐 <strong>Website:</strong> <a href="https://tariqjawad.com">tariqjawad.com</a></li>
+  <li>💼 <strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/tariq-jawad">linkedin.com/in/tariq-jawad</a></li>
+  <li>📧 <strong>Email:</strong> <a href="mailto:tariq.z.jawad4@gmail.com">tariq.z.jawad4@gmail.com</a></li>
+</ul>
