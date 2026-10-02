@@ -76,7 +76,7 @@ Instead of relying solely on physical wind tunnel tests for every design iterati
 <h3>🔹 Sample Inference (Actual vs. Predicted)</h3>
 <p>After persisting the trained pipeline to disk (<code>PipelineModel</code>) and reloading it for production inference, the model generated the following predictions on the test set:</p>
 <p align="center">
-  <img src="predictions_output.png" width="65%" alt="Model Predictions Output">
+  <img src="prediction_output.png" width="65%" alt="Model Predictions Output">
 </p>
 <h3>🔹 Aerodynamic Insights from Model Coefficients</h3>
 <p>By inspecting the learned weights of the standardized Linear Regression model, we can extract meaningful physical insights into what drives airfoil noise:</p>
