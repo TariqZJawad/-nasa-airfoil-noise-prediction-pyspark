@@ -69,7 +69,7 @@ To prevent data leakage and ensure seamless deployment, feature transformations 
 
 ### 🔹 Sample Inference (Actual vs. Predicted)
 After persisting the trained pipeline to disk (`PipelineModel`) and reloading it for production inference, the model generated the following predictions on the test set:
-![Model Predictions Output](predictions_output.png)
+![Model Predictions Output](prediction_output.png)
 ### 🔹 Aerodynamic Insights from Model Coefficients
 By inspecting the learned weights of the standardized Linear Regression model, we can extract meaningful physical insights into what drives airfoil noise:
 
